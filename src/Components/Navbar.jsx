@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { useLocation } from "react-router";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
 import PdsLogo from "../assets/PDS Logo.png";
 import WhyPDS from "./Whypds";
 
@@ -9,6 +9,7 @@ function Navbar() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navLink =
     "relative whitespace-nowrap py-2 text-[11px] font-extrabold uppercase tracking-[1px] text-[#063122] transition-colors hover:text-[#078D25]";
@@ -20,69 +21,116 @@ function Navbar() {
     setShowMobileMenu(false);
   }
 
+  function goToSection(sectionId) {
+    closeMenu();
+
+    if (location.pathname !== "/") {
+      navigate("/", {
+        state: { scrollTo: sectionId },
+      });
+    } else {
+      const section = document.getElementById(sectionId);
+
+      if (section) {
+        section.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    }
+  }
+
+  useEffect(() => {
+    const sectionId = location.state?.scrollTo;
+
+    if (location.pathname === "/" && sectionId) {
+      const timer = setTimeout(() => {
+        const section = document.getElementById(sectionId);
+
+        if (section) {
+          section.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
+
+        window.history.replaceState(
+          window.history.state,
+          "",
+          window.location.href
+        );
+      }, 150);
+
+      return () => clearTimeout(timer);
+    }
+  }, [location.pathname, location.state]);
+
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white shadow-sm">
-
         <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-2 sm:px-6 lg:px-8">
 
           {/* Logo */}
-          <a
-            href="/"
-            className="flex h-[65px] w-[145px] shrink-0 -translate-x-2 items-center justify-center sm:h-[75px] sm:w-[170px] xl:w-[185px] " 
+          <Link
+            to="/"
+            onClick={closeMenu}
+            className="flex h-[65px] w-[145px] shrink-0 -translate-x-2 items-center justify-center sm:h-[75px] sm:w-[170px] xl:w-[185px]"
           >
             <img
               src={PdsLogo}
               alt="PDS Photography Academy"
-              className="h-full w-full object-contain "
+              className="h-full w-full object-contain"
             />
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden items-center gap-3 lg:flex xl:gap-6">
 
-            <a
-              href="/"
+            <Link
+              to="/"
               className={`${navLink} ${
                 location.pathname === "/" ? activeLine : ""
               }`}
             >
               HOME
-            </a>
+            </Link>
 
-            <a
-              href="/courses"
+            <Link
+              to="/courses"
               className={`${navLink} ${
                 location.pathname === "/courses" ? activeLine : ""
               }`}
             >
               COURSES
-            </a>
+            </Link>
 
-              <a
-  href="/student"
-  className={`${navLink} ${
-    location.pathname === "/student" ? activeLine : ""
-  }`}
->
-  STUDENT WORK
-</a>
-
-            <a
-              href="/vediolibrary"
+            <Link
+              to="/student"
               className={`${navLink} ${
-                location.pathname === "/vediolibrary" ? activeLine : ""
+                location.pathname === "/student" ? activeLine : ""
+              }`}
+            >
+              STUDENT WORK
+            </Link>
+
+            <Link
+              to="/vediolibrary"
+              className={`${navLink} ${
+                location.pathname === "/vediolibrary"
+                  ? activeLine
+                  : ""
               }`}
             >
               VIDEO LIBRARY
-            </a>
+            </Link>
 
-            <a
-              href="/#reviews"
+            <button
+              type="button"
+              onClick={() => goToSection("reviews")}
               className={navLink}
             >
               REVIEWS
-            </a>
+            </button>
 
             <button
               type="button"
@@ -95,15 +143,13 @@ function Navbar() {
           </nav>
 
           {/* Desktop Enquiry Button */}
-           
-           {/* Desktop Enquiry Button */}
-<a
-  href="/#enquiry"
-  className="hidden shrink-0 items-center justify-center whitespace-nowrap rounded-xl bg-[#063B27] px-5 py-3 font-['Poppins'] text-sm font-semibold text-white shadow-sm transition duration-300 hover:bg-[#078D25] lg:inline-flex xl:px-7"
->
-  Enquire Now
-</a>
-
+          <button
+            type="button"
+            onClick={() => goToSection("enquiry")}
+            className="hidden shrink-0 items-center justify-center whitespace-nowrap rounded-xl bg-[#063B27] px-5 py-3 font-['Poppins'] text-sm font-semibold text-white shadow-sm transition duration-300 hover:bg-[#078D25] lg:inline-flex xl:px-7"
+          >
+            Enquire Now
+          </button>
 
           {/* Mobile / Tablet Menu Button */}
           <button
@@ -122,24 +168,29 @@ function Navbar() {
         {showMobileMenu && (
           <nav className="flex max-h-[75vh] flex-col gap-4 overflow-y-auto border-t border-gray-100 bg-white px-6 py-5 text-xs font-extrabold tracking-[1px] text-[#063122] lg:hidden">
 
-            <a href="/" onClick={closeMenu}>
+            <Link to="/" onClick={closeMenu}>
               HOME
-            </a>
+            </Link>
 
-            <a href="/courses" onClick={closeMenu}>
+            <Link to="/courses" onClick={closeMenu}>
               COURSES
-            </a>
+            </Link>
 
-              <a href="/student" onClick={closeMenu}>
-  STUDENT WORK
-</a>
-            <a href="/vediolibrary" onClick={closeMenu}>
+            <Link to="/student" onClick={closeMenu}>
+              STUDENT WORK
+            </Link>
+
+            <Link to="/vediolibrary" onClick={closeMenu}>
               VIDEO LIBRARY
-            </a>
+            </Link>
 
-            <a href="/#reviews" onClick={closeMenu}>
+            <button
+              type="button"
+              className="text-left"
+              onClick={() => goToSection("reviews")}
+            >
               REVIEWS
-            </a>
+            </button>
 
             <button
               type="button"
@@ -152,17 +203,16 @@ function Navbar() {
               WHY PDS?
             </button>
 
-            <a
-              href="/#enquiry"
-              onClick={closeMenu}
+            <button
+              type="button"
+              onClick={() => goToSection("enquiry")}
               className="bg-[#FFE000] px-5 py-3 text-center"
             >
               ENQUIRE NOW ↗
-            </a>
+            </button>
 
           </nav>
         )}
-
       </header>
 
       {/* Why PDS Popup */}
